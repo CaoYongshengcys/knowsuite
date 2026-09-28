@@ -1,6 +1,6 @@
 """模块 2：旧稿识别归并 / 版本治理.
 
-对标 JitKnow v4.1/v4.2：上传时相似度比对（强提示≈九成相似 / 弱提示较相似，最多列 3 篇旧稿），
+上传时相似度比对（强提示≈九成相似 / 弱提示较相似，最多列 3 篇旧稿），
 归并只写版本关系不删文件；现行稿/历史稿分链管理；检索侧提供"仅现行稿"清单；支持拆回独立与对照 diff。
 """
 import uuid
@@ -171,7 +171,7 @@ def merge(req: MergeReq, db: Session = Depends(get_db)):
 
 @router.post("/split")
 def split(req: SplitReq, db: Session = Depends(get_db)):
-    """单份拆回独立：仅该文档出链，不影响链上其他版本（对标 JitKnow 历史稿拆回独立）。"""
+    """单份拆回独立：仅该文档出链，不影响链上其他版本。"""
     d = db.get(DocVersion, req.doc_id)
     if not d:
         raise HTTPException(404, "文档不存在")
@@ -195,7 +195,7 @@ def current_docs(kb_id: str, db: Session = Depends(get_db)):
 
 @router.get("/compare")
 def compare(a: int, b: int, db: Session = Depends(get_db)):
-    """两版本按段落粗分对照（对标 JitKnow 历史稿与现行稿对照）。"""
+    """两版本按段落粗分对照（unified diff）。"""
     import difflib
     da, dbb = db.get(DocVersion, a), db.get(DocVersion, b)
     if not da or not dbb:
