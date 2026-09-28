@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# 运行时数据（数据库/视频/产物）
+data/
+*.db
+*.sqlite*
+
+# 配置（含密钥，绝不上传）
+.env
+backend/.env
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# 测试临时
+tests/tmp/

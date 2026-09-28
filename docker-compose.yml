@@ -1,0 +1,36 @@
+services:
+  knowsuite:
+    build: .
+    container_name: knowsuite
+    restart: unless-stopped
+    ports:
+      - "${KNOWSUITE_PORT:-8100}:8100"
+    volumes:
+      - ./data:/data
+    environment:
+      TZ: Asia/Shanghai
+      DATA_DIR: /data
+      # --- RAGFlow 对接（host.docker.internal 指向宿主机；NAS/服务器部署改成对应地址）---
+      RAGFLOW_API_BASE: ${RAGFLOW_API_BASE:-http://host.docker.internal:80}
+      RAGFLOW_API_KEY: ${RAGFLOW_API_KEY:-}
+      RAGFLOW_WEB: ${RAGFLOW_WEB:-http://host.docker.internal:80}
+      MOCK_RAGFLOW: ${MOCK_RAGFLOW:-0}
+      # --- 大模型（百炼 OpenAI 兼容） ---
+      AI_API_BASE: ${AI_API_BASE:-https://dashscope.aliyuncs.com/compatible-mode/v1}
+      AI_API_KEY: ${AI_API_KEY:-}
+      AI_MODEL: ${AI_MODEL:-qwen-plus}
+      AI_EMBED_MODEL: ${AI_EMBED_MODEL:-text-embedding-v4}
+      MOCK_LLM: ${MOCK_LLM:-0}
+      # --- ASR / 视觉 ---
+      ASR_API_BASE: ${ASR_API_BASE:-}
+      ASR_API_KEY: ${ASR_API_KEY:-}
+      ASR_MODEL: ${ASR_MODEL:-whisper-large-v3-turbo}
+      ASR_OMNI_MODEL: ${ASR_OMNI_MODEL:-}
+      VL_MODEL: ${VL_MODEL:-qwen-vl-plus}
+      # --- 支付 / 管理 ---
+      PAYMENT_GATEWAY: ${PAYMENT_GATEWAY:-mock}
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-change-me-admin-token}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    # 内存保护：本套件自身很轻（<500MB），限额防止异常
+    mem_limit: 1g

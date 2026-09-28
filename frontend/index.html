@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KnowSuite · RAGFlow 企业增强套件</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧩</text></svg>">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner">
+  <span class="brand">🧩 KnowSuite</span>
+  <div class="tabs">
+    <button class="tab active" data-tab="overview">概览</button>
+    <button class="tab" data-tab="eval">评测看板</button>
+    <button class="tab" data-tab="version">版本治理</button>
+    <button class="tab" data-tab="billing">订阅支付</button>
+    <button class="tab" data-tab="oem">OEM 贴牌</button>
+    <button class="tab" data-tab="video">视频理解</button>
+  </div>
+  <div class="admin-box">
+    <input id="adminToken" type="password" placeholder="管理口令(X-Admin-Token)" style="width:170px">
+  </div>
+</div></nav>
+
+<main class="wrap">
+
+<!-- ============ 概览 ============ -->
+<section id="tab-overview" class="tabpane active">
+  <h1>系统概览</h1>
+  <div class="grid g2">
+    <div class="card"><h2>运行状态</h2><pre id="healthOut" class="out">加载中…</pre></div>
+    <div class="card"><h2>RAGFlow 知识库</h2><div id="dsList" class="list">加载中…</div>
+      <button class="btn sm" onclick="KS.loadDatasets()">刷新</button></div>
+  </div>
+  <div class="card">
+    <h2>五大模块</h2>
+    <div class="grid g5">
+      <a class="mod" href="javascript:KS.go('eval')"><b>📊 评测看板</b><span>RAGAS 风格四指标 + 测试集跑批</span></a>
+      <a class="mod" href="javascript:KS.go('version')"><b>🗂 版本治理</b><span>旧稿识别归并 / 现行稿-历史稿</span></a>
+      <a class="mod" href="javascript:KS.go('billing')"><b>💳 订阅支付</b><span>套餐 / 订单 / 配额闸门</span></a>
+      <a class="mod" href="javascript:KS.go('oem')"><b>🎨 OEM 贴牌</b><span>品牌门户 + 页面注入代理</span></a>
+      <a class="mod" href="javascript:KS.go('video')"><b>🎬 视频理解</b><span>转写 + 关键帧描述入库</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 评测看板 ============ -->
+<section id="tab-eval" class="tabpane">
+  <h1>📊 RAGAS 风格评测看板</h1>
+  <div class="grid g2">
+    <div class="card">
+      <h2>测试集</h2>
+      <div class="form-row">
+        <input id="esName" placeholder="名称，如：储能论文QA集">
+        <select id="esKb"></select>
+        <input id="esChat" placeholder="chat_id（可选，用RAGFlow助手回答）" style="width:180px">
+        <button class="btn" onclick="KS.evalCreateSet()">新建</button>
+      </div>
+      <div id="esList" class="list"></div>
+    </div>
+    <div class="card">
+      <h2>用例管理 <span id="esCurName" class="muted"></span></h2>
+      <div class="form-row">
+        <input id="ecQ" placeholder="问题">
+        <input id="ecGt" placeholder="参考答案（可空）">
+        <button class="btn sm" onclick="KS.evalAddCase()">添加</button>
+      </div>
+      <textarea id="ecImport" rows="3" placeholder="批量导入：每行  问题||参考答案"></textarea>
+      <div class="form-row">
+        <button class="btn sm ghost" onclick="KS.evalImportCases()">批量导入</button>
+        <button class="btn" onclick="KS.evalRun()">▶ 开始跑批</button>
+      </div>
+      <div id="ecList" class="list"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>批次与得分</h2>
+    <div id="runList" class="list"></div>
+  </div>
+  <div class="card">
+    <h2>批次详情 <span id="runCur" class="muted"></span></h2>
+    <div id="runDetail"></div>
+  </div>
+</section>
+
+<!-- ============ 版本治理 ============ -->
+<section id="tab-version" class="tabpane">
+  <h1>🗂 旧稿识别归并 / 版本治理</h1>
+  <div class="grid g2">
+    <div class="card">
+      <h2>入库前查重</h2>
+      <div class="form-row"><select id="vcKb"></select>
+        <input id="vcTitle" placeholder="文档标题"></div>
+      <textarea id="vcText" rows="5" placeholder="粘贴文档文本（或正文前2000字）…"></textarea>
+      <div class="form-row"><button class="btn" onclick="KS.verCheck()">相似度检测</button></div>
+      <div id="vcResult"></div>
+    </div>
+    <div class="card">
+      <h2>登记版本</h2>
+      <div class="form-row"><select id="vrKb"></select>
+        <input id="vrTitle" placeholder="标题">
+        <input id="vrDocId" placeholder="RAGFlow doc_id（可空）"></div>
+      <div class="form-row">
+        <input id="vrParent" placeholder="parent_id（归入某链，可空）" style="width:150px">
+        <input id="vrBy" placeholder="登记人" style="width:110px">
+        <button class="btn" onclick="KS.verRegister()">登记</button>
+      </div>
+      <textarea id="vrText" rows="3" placeholder="文档文本（用于指纹与对照）…"></textarea>
+      <h3>对照 diff</h3>
+      <div class="form-row"><input id="vcmpA" placeholder="doc A id" style="width:90px">
+        <input id="vcmpB" placeholder="doc B id" style="width:90px">
+        <button class="btn sm ghost" onclick="KS.verCompare()">对照</button></div>
+      <pre id="vcmpOut" class="out small"></pre>
+    </div>
+  </div>
+  <div class="card">
+    <h2>版本链 <button class="btn sm ghost" onclick="KS.verChains()">刷新</button></h2>
+    <div id="chainList" class="list"></div>
+    <div id="chainDetail"></div>
+  </div>
+</section>
+
+<!-- ============ 订阅支付 ============ -->
+<section id="tab-billing" class="tabpane">
+  <h1>💳 订阅支付</h1>
+  <div class="card"><h2>套餐</h2><div id="planList" class="grid g4"></div></div>
+  <div class="grid g2">
+    <div class="card">
+      <h2>下单</h2>
+      <div class="form-row"><input id="odUser" placeholder="user_ref（租户标识）">
+        <select id="odPlan"></select>
+        <select id="odGw"><option value="">默认网关</option><option value="mock">mock</option>
+          <option value="qrcode">扫码+人工确认</option><option value="alipay">alipay(占位)</option></select>
+        <button class="btn" onclick="KS.billOrder()">创建订单</button></div>
+      <pre id="odOut" class="out"></pre>
+    </div>
+    <div class="card">
+      <h2>订单管理（管理）</h2>
+      <div class="form-row"><button class="btn sm" onclick="KS.billOrders()">刷新订单</button>
+        <input id="cfOrderNo" placeholder="订单号" style="width:190px">
+        <button class="btn sm ok" onclick="KS.billConfirm()">确认到账</button></div>
+      <div id="orderList" class="list"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>订阅与配额查询</h2>
+    <div class="form-row"><input id="subUser" placeholder="user_ref">
+      <button class="btn sm" onclick="KS.billSub()">查询</button></div>
+    <pre id="subOut" class="out"></pre>
+  </div>
+</section>
+
+<!-- ============ OEM ============ -->
+<section id="tab-oem" class="tabpane">
+  <h1>🎨 OEM 贴牌</h1>
+  <div class="grid g2">
+    <div class="card">
+      <h2>品牌配置</h2>
+      <div class="form-row"><input id="brKey" placeholder="key（URL路径，如 mycorp）" style="width:130px">
+        <input id="brName" placeholder="品牌名称">
+        <input id="brColor" type="color" value="#2563eb" style="width:50px"></div>
+      <div class="form-row"><input id="brLogo" placeholder="logo URL（可空）" style="flex:1"></div>
+      <input id="brFooter" placeholder="页脚文字" style="width:100%;margin-bottom:6px">
+      <input id="brNotice" placeholder="登录页公告（可空）" style="width:100%;margin-bottom:6px">
+      <textarea id="brCss" rows="2" placeholder="自定义 CSS（可空）"></textarea>
+      <div class="form-row"><button class="btn" onclick="KS.oemSave()">创建 / 更新</button>
+        <button class="btn ghost sm" onclick="KS.oemList()">刷新列表</button></div>
+      <div id="brandList" class="list"></div>
+    </div>
+    <div class="card">
+      <h2>门户入口</h2>
+      <p class="muted small">iframe 品牌外壳（稳定）：<a id="portalLink" href="#" target="_blank">/portal/{key}</a><br>
+      实验性直连注入代理：<a id="proxyLink" href="#" target="_blank">/proxy/{key}/</a>（转发 RAGFlow 页面并注入 title/logo/配色）</p>
+      <iframe id="oemPreview" style="width:100%;height:420px;border:1px solid #e2e8f0;border-radius:8px" src="about:blank"></iframe>
+      <div class="form-row"><button class="btn sm" onclick="KS.oemPreview()">预览选中品牌门户</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 视频理解 ============ -->
+<section id="tab-video" class="tabpane">
+  <h1>🎬 视频理解</h1>
+  <div class="card">
+    <h2>上传视频</h2>
+    <div class="form-row">
+      <input id="vdFile" type="file" accept="video/*">
+      <select id="vdKb"></select>
+      <input id="vdUser" placeholder="user_ref（配额，可空）" style="width:150px">
+      <button class="btn" onclick="KS.videoUpload()">上传并处理</button>
+    </div>
+    <p class="muted small">流水线：ffmpeg 抽音频+关键帧 → ASR 转写 → 视觉模型逐帧描述 → 合成 Markdown → 入 RAGFlow 知识库。未装 ffmpeg / 未配 ASR 时自动 mock 降级演示。</p>
+  </div>
+  <div class="card">
+    <h2>任务列表 <button class="btn sm ghost" onclick="KS.videoJobs()">刷新</button></h2>
+    <div id="jobList" class="list"></div>
+  </div>
+  <div class="card"><h2>产物预览 <span id="mdCur" class="muted"></span></h2>
+    <pre id="mdOut" class="out"></pre></div>
+</section>
+
+</main>
+<div id="toast"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>
