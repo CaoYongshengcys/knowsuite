@@ -31,6 +31,7 @@
 
     go(tab) { $$(".tab").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
       $$(".tabpane").forEach(p => p.classList.toggle("active", p.id === "tab-" + tab));
+      if (history.replaceState) history.replaceState(null, "", "#" + tab);
       ({ eval: KS.evalSets, version: KS.verChains, billing: KS.billInit, oem: KS.oemList, video: KS.videoJobs }[tab] || (() => {}))(); },
 
     // ---------- 概览 ----------
@@ -268,7 +269,11 @@
     const t = e.target.closest(".tab");
     if (t) KS.go(t.dataset.tab);
   });
-  $("#adminToken").value = localStorage.getItem("ks_admin") || "";
+  $("#adminToken").value = new URLSearchParams(location.search).get("token") || localStorage.getItem("ks_admin") || "";
   $("#adminToken").addEventListener("change", (e) => localStorage.setItem("ks_admin", e.target.value));
-  KS.health(); KS.loadDatasets(); KS.evalSets();
+  if ($("#adminToken").value) localStorage.setItem("ks_admin", $("#adminToken").value);
+  KS.health(); KS.loadDatasets();
+  // URL 锚点直达标签页（如 /#eval），便于分享与自动化截图
+  var h = (location.hash || "").replace("#", "");
+  KS.go(["overview", "eval", "version", "billing", "oem", "video"].indexOf(h) >= 0 ? h : "overview");
 })();

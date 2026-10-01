@@ -7,8 +7,13 @@ venv/
 
 # 运行时数据（数据库/视频/产物）
 data/
+demo_data/
+_shots/
 *.db
 *.sqlite*
+
+# Node（截图工具依赖）
+node_modules/
 
 # 配置（含密钥，绝不上传）
 .env
